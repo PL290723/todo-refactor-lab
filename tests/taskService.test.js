@@ -59,7 +59,6 @@ describe("agregarTarea", () => {
 
 // MISIÓN 4: prueba id existente e inexistente para buscarTarea().
 // MISIÓN 5: prueba colección mixta, sin coincidencias y vacía.
-// MISIÓN 6: prueba cambio correcto, otra tarea intacta e id inexistente.
 // MISIÓN 7: prueba eliminar existente, inexistente y colección vacía.
 // MISIÓN 8: prueba obtenerResumen(), incluyendo colección vacía.
 
@@ -67,6 +66,31 @@ describe("agregarTarea", () => {
 void buscarTarea;
 void obtenerPendientes;
 void obtenerTerminadas;
-void cambiarEstado;
 void eliminarTarea;
 void obtenerResumen;
+
+describe("cambiarEstado", () => {
+  const tareasIniciales = [
+    { id: 1, titulo: "Tarea 1", completada: false },
+    { id: 2, titulo: "Tarea 2", completada: false }
+  ];
+
+  it("cambia el estado de completada de la tarea indicada", () => {
+    const resultado = cambiarEstado(tareasIniciales, 1);
+
+    expect(resultado[0].completada).toBe(true);
+  });
+
+  it("no altera el estado de las otras tareas", () => {
+    const resultado = cambiarEstado(tareasIniciales, 1);
+
+    expect(resultado[1].completada).toBe(false);
+    expect(resultado[1]).toEqual(tareasIniciales[1]);
+  });
+
+  it("conserva el contenido original si el id es inexistente", () => {
+    const resultado = cambiarEstado(tareasIniciales, 99);
+
+    expect(resultado).toEqual(tareasIniciales);
+  });
+});
