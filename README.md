@@ -67,6 +67,53 @@ const tarea = {
 - Se siguen mostrando las mismas tres tareas, en el mismo orden, como elementos `<li>` dentro de `#task-list`.
 - Volver a renderizar la lista reemplaza su contenido sin duplicar tareas.
 
+## Misión 2 · Crear una tarea con una función pura
+
+**Objetivo:** encapsular la construcción de una tarea en una función de dominio que se pueda probar sin el DOM.
+
+Se implementó `crearTarea(id, titulo)` en `src/taskService.js`. Devuelve un objeto con el formato definido en la Misión 1 y con `completada: false` por defecto:
+
+```js
+export function crearTarea(id, titulo) {
+  return {
+    id: id,
+    titulo: titulo,
+    completada: false
+  };
+}
+```
+
+### Prueba (`tests/taskService.test.js`)
+
+- **"crea una tarea pendiente con id y título":** `crearTarea(10, "Diseñar pruebas")` debe ser igual (`toEqual`) a `{ id: 10, titulo: "Diseñar pruebas", completada: false }`.
+
+### Ciclo RED → GREEN
+
+- **RED:** la prueba fallaba porque `crearTarea()` lanzaba `Error("Misión 2 pendiente: implementar crearTarea()")`.
+- **GREEN:** se reemplazó el `throw` por el `return` del objeto `{ id, titulo, completada: false }`.
+
+## Misión 3 · Agregar sin acoplarse al DOM
+
+**Objetivo:** separar la transformación de datos de la representación visual.
+
+Se implementó `agregarTarea(tareas, nuevaTarea)` en `src/taskService.js`. La función devuelve una **nueva** colección con la tarea agregada al final, sin modificar el arreglo original y sin tocar el DOM:
+
+```js
+export function agregarTarea(tareas, nuevaTarea) {
+  return [...tareas, nuevaTarea];
+}
+```
+
+### Pruebas agregadas (`tests/taskService.test.js`)
+
+- **"agrega una nueva tarea a la colección":** a partir de una colección vacía, el resultado contiene `nuevaTarea` (`toContainEqual`).
+- **"devuelve una colección con un elemento más":** a partir de una colección con una tarea, el resultado tiene `tareasIniciales.length + 1` elementos.
+
+### Ciclo RED → GREEN
+
+- **RED:** se escribieron las dos pruebas; fallaron porque `agregarTarea()` lanzaba `Error("Misión 3 pendiente: implementar agregarTarea()")`.
+- **GREEN:** se reemplazó el `throw` por `return [...tareas, nuevaTarea];`. El operador spread crea un arreglo nuevo, por lo que `tareas` no se modifica (a diferencia de `push()`).
+
 ## Registro RED → GREEN → REFACTOR
 
 Documenta al menos una iteración:
@@ -83,3 +130,5 @@ Registra por misión quién fue **Driver** y quién **Navigator**. Intercambien 
 |---|---|---|
 | Misión 0 | Paulo | Jairo |
 | Misión 1 | Jairo | Paulo |
+| Misión 2 | Paulo | Jairo |
+| Misión 3 | Jairo | Paulo |
