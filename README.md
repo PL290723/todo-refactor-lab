@@ -43,6 +43,30 @@ La primera prueba está preparada para fallar: es el punto de partida de la **Mi
 2. Cada tarea se representa como un elemento `<li>` dentro de `#task-list`.
 3. Cada llamada a mostrar la lista limpia y vuelve a generar su contenido; las llamadas repetidas no acumulan elementos duplicados.
 
+## Misión 1 · Cambiar el modelo: de string a objeto
+
+**Objetivo:** evolucionar la representación de una tarea para que pueda incorporar identidad y estado.
+
+La colección inicial dejó de ser un arreglo de strings y ahora es un arreglo de objetos. Cada tarea tiene este formato:
+
+```js
+const tarea = {
+  id: 1,
+  titulo: "Diseñar pruebas",
+  completada: false
+};
+```
+
+### Cambios realizados
+
+- `src/legacy.js`: `tareas` ahora es un arreglo de objetos `{ id, titulo, completada }` y `mostrarTareas()` muestra `tarea.titulo`.
+- `src/app.js`: la colección inicial usa el mismo formato; `render()` muestra `tarea.titulo` y cada tarea nueva se agrega como objeto con un `id` incremental y `completada: false`.
+
+### Comportamiento conservado
+
+- Se siguen mostrando las mismas tres tareas, en el mismo orden, como elementos `<li>` dentro de `#task-list`.
+- Volver a renderizar la lista reemplaza su contenido sin duplicar tareas.
+
 ## Registro RED → GREEN → REFACTOR
 
 Documenta al menos una iteración:
@@ -58,3 +82,4 @@ Registra por misión quién fue **Driver** y quién **Navigator**. Intercambien 
 | Misión | Navigator | Driver |
 |---|---|---|
 | Misión 0 | Paulo | Jairo |
+| Misión 1 | Jairo | Paulo |
