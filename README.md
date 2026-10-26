@@ -114,6 +114,58 @@ export function agregarTarea(tareas, nuevaTarea) {
 - **RED:** se escribieron las dos pruebas; fallaron porque `agregarTarea()` lanzaba `Error("Misión 3 pendiente: implementar agregarTarea()")`.
 - **GREEN:** se reemplazó el `throw` por `return [...tareas, nuevaTarea];`. El operador spread crea un arreglo nuevo, por lo que `tareas` no se modifica (a diferencia de `push()`).
 
+## Misión 4 · find(): buscar una tarea por id
+
+**Objetivo:** localizar una tarea por su identidad sin recorrer la colección manualmente.
+
+Se implementó `buscarTarea(tareas, id)` en `src/taskService.js` usando `find()`. Devuelve la primera tarea cuyo `id` coincide, o `undefined` si no existe:
+
+```js
+export function buscarTarea(tareas, id) {
+  return tareas.find(tarea => tarea.id === id);
+}
+```
+
+### Pruebas (`tests/taskService.test.js`)
+
+- **"encuentra y devuelve la tarea con un id existente":** buscar el id `2` devuelve `{ id: 2, titulo: "Refactorizar", completada: true }`.
+- **"devuelve undefined si el id no existe":** buscar el id `99` devuelve `undefined`.
+
+### Ciclo RED → GREEN
+
+- **RED:** las pruebas fallaban porque `buscarTarea()` lanzaba `Error("Misión 4 pendiente: implementar buscarTarea()")`.
+- **GREEN:** se reemplazó el `throw` por `return tareas.find(tarea => tarea.id === id);`.
+
+## Misión 5 · filter(): seleccionar subconjuntos
+
+**Objetivo:** construir subconjuntos de tareas sin alterar la colección original.
+
+Se implementaron `obtenerPendientes(tareas)` y `obtenerTerminadas(tareas)` en `src/taskService.js` usando `filter()`, que siempre devuelve un arreglo **nuevo** y no modifica el original:
+
+```js
+export function obtenerPendientes(tareas) {
+  return tareas.filter(t => !t.completada);
+}
+
+export function obtenerTerminadas(tareas) {
+  return tareas.filter(t => t.completada);
+}
+```
+
+### Pruebas (`tests/taskService.test.js`)
+
+Sobre una colección mixta (ids `1` y `3` pendientes, id `2` terminada):
+
+- **"filtra correctamente las tareas pendientes en una colección mixta":** devuelve 2 tareas, con ids `1` y `3` en ese orden.
+- **"devuelve un arreglo vacío si no hay coincidencias (ninguna pendiente)":** si todas están terminadas, devuelve `[]`.
+- **"devuelve un arreglo vacío si la colección inicial está vacía":** `obtenerPendientes([])` devuelve `[]`.
+- **"filtra correctamente las tareas terminadas":** devuelve 1 tarea, con id `2`.
+
+### Ciclo RED → GREEN
+
+- **RED:** las 4 pruebas fallaron porque ambas funciones lanzaban `Error("Misión 5 pendiente: ...")`.
+- **GREEN:** se reemplazaron los `throw` por `tareas.filter(...)` con la condición `!t.completada` (pendientes) y `t.completada` (terminadas).
+
 ## Registro RED → GREEN → REFACTOR
 
 Documenta al menos una iteración:
@@ -132,3 +184,5 @@ Registra por misión quién fue **Driver** y quién **Navigator**. Intercambien 
 | Misión 1 | Jairo | Paulo |
 | Misión 2 | Paulo | Jairo |
 | Misión 3 | Jairo | Paulo |
+| Misión 4 | Paulo | Jairo |
+| Misión 5 | Jairo | Paulo |
