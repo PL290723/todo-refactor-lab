@@ -134,7 +134,6 @@ describe("obtenerPendientes y obtenerTerminadas", () => {
 // MISIÓN 8: prueba obtenerResumen(), incluyendo colección vacía.
 
 // Los imports anteriores quedan preparados para que construyas la suite de forma incremental.
-void eliminarTarea;
 void obtenerResumen;
 
 describe("cambiarEstado", () => {
@@ -160,5 +159,37 @@ describe("cambiarEstado", () => {
     const resultado = cambiarEstado(tareasIniciales, 99);
 
     expect(resultado).toEqual(tareasIniciales);
+  });
+});
+
+describe("eliminarTarea", () => {
+  const tareasIniciales = [
+    { id: 1, titulo: "Tarea 1", completada: false },
+    { id: 2, titulo: "Tarea 2", completada: true }
+  ];
+
+  it("elimina una tarea con un id existente", () => {
+    // Act
+    const resultado = eliminarTarea(tareasIniciales, 1);
+
+    // Assert
+    expect(resultado.length).toBe(1);
+    expect(resultado[0].id).toBe(2);
+  });
+
+  it("conserva la colección intacta si el id es inexistente", () => {
+    // Act
+    const resultado = eliminarTarea(tareasIniciales, 99);
+
+    // Assert
+    expect(resultado).toEqual(tareasIniciales);
+  });
+
+  it("devuelve un arreglo vacío si la colección inicial está vacía", () => {
+    // Act
+    const resultado = eliminarTarea([], 1);
+
+    // Assert
+    expect(resultado).toEqual([]);
   });
 });
