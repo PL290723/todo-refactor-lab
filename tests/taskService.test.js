@@ -31,7 +31,32 @@ describe("crearTarea", () => {
   });
 });
 
-// MISIÓN 3: agrega al menos dos pruebas para agregarTarea().
+describe("agregarTarea", () => {
+  it("agrega una nueva tarea a la colección", () => {
+    // Arrange
+    const tareas = [];
+    const nuevaTarea = { id: 1, titulo: "Aprender Vitest", completada: false };
+
+    // Act
+    const resultado = agregarTarea(tareas, nuevaTarea);
+
+    // Assert
+    expect(resultado).toContainEqual(nuevaTarea);
+  });
+
+  it("devuelve una colección con un elemento más", () => {
+    // Arrange
+    const tareasIniciales = [{ id: 1, titulo: "Tarea 1", completada: false }];
+    const nuevaTarea = { id: 2, titulo: "Tarea 2", completada: false };
+
+    // Act
+    const resultado = agregarTarea(tareasIniciales, nuevaTarea);
+
+    // Assert
+    expect(resultado.length).toBe(tareasIniciales.length + 1);
+  });
+});
+
 // MISIÓN 4: prueba id existente e inexistente para buscarTarea().
 // MISIÓN 5: prueba colección mixta, sin coincidencias y vacía.
 // MISIÓN 6: prueba cambio correcto, otra tarea intacta e id inexistente.
@@ -39,7 +64,6 @@ describe("crearTarea", () => {
 // MISIÓN 8: prueba obtenerResumen(), incluyendo colección vacía.
 
 // Los imports anteriores quedan preparados para que construyas la suite de forma incremental.
-void agregarTarea;
 void buscarTarea;
 void obtenerPendientes;
 void obtenerTerminadas;
