@@ -166,6 +166,27 @@ Sobre una colección mixta (ids `1` y `3` pendientes, id `2` terminada):
 - **RED:** las 4 pruebas fallaron porque ambas funciones lanzaban `Error("Misión 5 pendiente: ...")`.
 - **GREEN:** se reemplazaron los `throw` por `tareas.filter(...)` con la condición `!t.completada` (pendientes) y `t.completada` (terminadas).
 
+## Misión 8 · Resumen y composición
+
+**Objetivo:** resumir el estado de una colección reutilizando las reglas ya implementadas.
+
+Se implementó `obtenerResumen(tareas)` en `src/taskService.js`. Devuelve el total de tareas y los conteos de pendientes y terminadas, usando `obtenerPendientes()` y `obtenerTerminadas()`:
+
+```js
+export function obtenerResumen(tareas) {
+  return {
+    total: tareas.length,
+    pendientes: obtenerPendientes(tareas).length,
+    terminadas: obtenerTerminadas(tareas).length
+  };
+}
+```
+
+### Pruebas (`tests/taskService.test.js`)
+
+- **"devuelve el conteo correcto de total, pendientes y terminadas":** verifica el resumen de una colección mixta de tres tareas.
+- **"devuelve ceros si la colección está vacía":** verifica que una colección vacía produzca `{ total: 0, pendientes: 0, terminadas: 0 }`.
+
 ## Registro RED → GREEN → REFACTOR
 
 Documenta al menos una iteración:

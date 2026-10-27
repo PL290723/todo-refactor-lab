@@ -131,10 +131,8 @@ describe("obtenerPendientes y obtenerTerminadas", () => {
 });
 
 // MISIÓN 7: prueba eliminar existente, inexistente y colección vacía.
-// MISIÓN 8: prueba obtenerResumen(), incluyendo colección vacía.
 
 // Los imports anteriores quedan preparados para que construyas la suite de forma incremental.
-void obtenerResumen;
 
 describe("cambiarEstado", () => {
   const tareasIniciales = [
@@ -191,5 +189,33 @@ describe("eliminarTarea", () => {
 
     // Assert
     expect(resultado).toEqual([]);
+  });
+});
+
+describe("obtenerResumen", () => {
+  it("devuelve el conteo correcto de total, pendientes y terminadas", () => {
+    const tareas = [
+      { id: 1, titulo: "Tarea 1", completada: false },
+      { id: 2, titulo: "Tarea 2", completada: true },
+      { id: 3, titulo: "Tarea 3", completada: false }
+    ];
+
+    const resultado = obtenerResumen(tareas);
+
+    expect(resultado).toEqual({
+      total: 3,
+      pendientes: 2,
+      terminadas: 1
+    });
+  });
+
+  it("devuelve ceros si la colección está vacía", () => {
+    const resultado = obtenerResumen([]);
+
+    expect(resultado).toEqual({
+      total: 0,
+      pendientes: 0,
+      terminadas: 0
+    });
   });
 });
