@@ -7,11 +7,12 @@
  */
 
 // MISIÓN 2
-export function crearTarea(id, titulo) {
+export function crearTarea(id, titulo, prioridad = "baja") {
   return {
     id,
     titulo,
-    completada: false
+    completada: false,
+    prioridad
   };
 }
 
@@ -55,4 +56,31 @@ export function obtenerResumen(tareas) {
     pendientes: obtenerPendientes(tareas).length,
     terminadas: obtenerTerminadas(tareas).length
   };
+}
+
+// MISIÓN 11 · A) Prioridad
+export function filtrarPorPrioridad(tareas, prioridad) {
+  return tareas.filter(tarea => tarea.prioridad === prioridad);
+}
+
+// MISIÓN 11 · B) Buscar por texto (ignorando mayúsculas y minúsculas)
+export function buscarPorTexto(tareas, texto) {
+  const busqueda = texto.toLowerCase();
+  return tareas.filter(tarea => tarea.titulo.toLowerCase().includes(busqueda));
+}
+
+// MISIÓN 11 · C) Porcentaje de avance
+export function calcularAvance(tareas) {
+  if (tareas.length === 0) return 0;
+  return Math.round((obtenerTerminadas(tareas).length / tareas.length) * 100);
+}
+
+// MISIÓN 11 · D) Evitar duplicados (normalizado)
+function normalizarTitulo(titulo) {
+  return titulo.trim().toLowerCase();
+}
+
+export function esTituloDuplicado(tareas, nuevoTitulo) {
+  const tituloNormalizado = normalizarTitulo(nuevoTitulo);
+  return tareas.some(tarea => normalizarTitulo(tarea.titulo) === tituloNormalizado);
 }
