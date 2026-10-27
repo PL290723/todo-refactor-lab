@@ -187,6 +187,20 @@ export function obtenerResumen(tareas) {
 - **"devuelve el conteo correcto de total, pendientes y terminadas":** verifica el resumen de una colección mixta de tres tareas.
 - **"devuelve ceros si la colección está vacía":** verifica que una colección vacía produzca `{ total: 0, pendientes: 0, terminadas: 0 }`.
 
+## Misión 10 · Refactor final protegido por pruebas
+
+**Objetivo:** mejorar la legibilidad y la separación de responsabilidades sin cambiar el comportamiento.
+
+### Refactors realizados
+
+- `src/taskService.js`: se usó la forma abreviada de propiedades al crear una tarea y se reemplazaron los parámetros `t` por `tarea` en los filtros para expresar mejor su intención.
+- `src/app.js`: se renombraron referencias del DOM y del filtro con nombres más descriptivos. La actualización de la lista y del resumen se separó en `renderTareas()` y `renderResumen()`, coordinadas por `render()`.
+- La lógica de dominio continúa en `taskService.js`; `app.js` conserva la responsabilidad de conectar eventos del DOM y mostrar los resultados.
+
+### Verificación
+
+Se ejecutó `npm test` después de cada refactor. Las 17 pruebas pasaron en ambas ejecuciones.
+
 ## Registro RED → GREEN → REFACTOR
 
 Documenta al menos una iteración:
