@@ -19,6 +19,11 @@
         <label for="task-input">Nueva tarea</label>
         <div class="row">
           <input id="task-input" autocomplete="off" placeholder="Ej. Diseñar pruebas" />
+          <select id="task-priority" aria-label="Prioridad de la nueva tarea">
+            <option value="baja">Baja</option>
+            <option value="media">Media</option>
+            <option value="alta">Alta</option>
+          </select>
           <button type="submit">Agregar</button>
         </div>
         <p id="message" class="message" aria-live="polite"></p>
@@ -28,10 +33,21 @@
         <button data-filter="todas" class="filter active">Todas</button>
         <button data-filter="pendientes" class="filter">Pendientes</button>
         <button data-filter="terminadas" class="filter">Terminadas</button>
+        <select id="priority-filter" aria-label="Filtrar por prioridad">
+          <option value="todas">Todas las prioridades</option>
+          <option value="baja">Prioridad baja</option>
+          <option value="media">Prioridad media</option>
+          <option value="alta">Prioridad alta</option>
+        </select>
+        <input id="search-input" type="search" autocomplete="off" placeholder="Buscar por título" aria-label="Buscar por título" />
       </div>
 
       <ul id="task-list" class="tasks"></ul>
       <p id="summary" class="summary"></p>
+      <div class="progress">
+        <progress id="progress-bar" max="100" value="0"></progress>
+        <span id="progress-text">Avance: 0%</span>
+      </div>
     </section>
   </main>
 

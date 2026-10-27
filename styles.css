@@ -21,3 +21,11 @@ button { padding:10px 14px; border:0; border-radius:10px; cursor:pointer; font-w
 .task-actions button { background:#edf2f7; }
 .message { min-height:1.25em; margin:8px 0 0; }
 .summary { margin:18px 0 0; font-weight:700; }
+select { padding:10px 12px; border:1px solid #bcc8d8; border-radius:10px; font:inherit; background:white; }
+.toolbar input { min-width:180px; }
+.priority { font-size:.75rem; font-weight:700; text-transform:uppercase; padding:2px 8px; border-radius:999px; margin-left:8px; }
+.priority-baja { background:#e6f4ea; color:#1e6b34; }
+.priority-media { background:#fff4d6; color:#7a5200; }
+.priority-alta { background:#fde2e1; color:#a1261f; }
+.progress { display:flex; align-items:center; gap:12px; margin-top:10px; }
+.progress progress { flex:1; height:12px; }

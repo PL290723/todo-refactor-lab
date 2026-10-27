@@ -201,6 +201,28 @@ export function obtenerResumen(tareas) {
 
 Se ejecutó `npm test` después de cada refactor. Las 17 pruebas pasaron en ambas ejecuciones.
 
+## Misión 11 · Nuevo requerimiento (los 4 retos)
+
+**Objetivo:** comprobar si el diseño resultante facilita incorporar cambios sin romper lo existente.
+
+Se agregaron cuatro funciones puras en `src/taskService.js`, cada una con su prueba escrita antes de la implementación:
+
+- **A) Prioridad:** `crearTarea(id, titulo, prioridad = "baja")` ahora recibe la prioridad como tercer parámetro, y `filtrarPorPrioridad(tareas, prioridad)` devuelve solo las tareas con esa prioridad.
+- **B) Buscar por texto:** `buscarPorTexto(tareas, texto)` encuentra tareas cuyo título contiene el texto, sin distinguir mayúsculas de minúsculas.
+- **C) Porcentaje de avance:** `calcularAvance(tareas)` devuelve el porcentaje redondeado de tareas terminadas, reutilizando `obtenerTerminadas()`; con una colección vacía devuelve `0`.
+- **D) Evitar duplicados:** `esTituloDuplicado(tareas, nuevoTitulo)` compara títulos normalizados (sin espacios al inicio o al final y en minúsculas) mediante `normalizarTitulo()`.
+
+### Ciclo RED → GREEN
+
+- **RED:** fallaron 7 pruebas: las 5 nuevas por `is not a function`, y las 2 de `crearTarea` (la original se actualizó para esperar `prioridad: "baja"` y se agregó una para la prioridad explícita).
+- **GREEN:** se implementaron las cuatro funciones y el parámetro `prioridad`. Las 23 pruebas pasan.
+
+### Integración en la interfaz
+
+- `index.html`: selector de prioridad al crear una tarea, filtro por prioridad, campo de búsqueda y barra de avance.
+- `src/app.js`: los filtros se combinan (estado → `filtrarPorPrioridad()` → `buscarPorTexto()`), cada tarea muestra su prioridad, la barra usa `calcularAvance()` y el formulario rechaza títulos repetidos con `esTituloDuplicado()`.
+- `styles.css`: estilos para los selectores, las etiquetas de prioridad y la barra de avance.
+
 ## Registro RED → GREEN → REFACTOR
 
 Documenta al menos una iteración:
@@ -225,3 +247,13 @@ Registra por misión quién fue **Driver** y quién **Navigator**. Intercambien 
 | Misión 7 | Jairo | Paulo |
 | Misión 8 | Paulo | Jairo |
 | Misión 9 | Jairo | Paulo |
+| Misión 10 | Paulo | Jairo |
+| Misión 11 | Jairo | Paulo |
+
+## Reflexión final (Paulo y Jairo)
+
+Separar la lógica de dominio de la interfaz fue lo que más mejoró la mantenibilidad. Al principio, `legacy.js` y `app.js` mezclaban los datos, las reglas y el DOM en el mismo lugar: para cambiar cómo se eliminaba una tarea había que tocar el código que pintaba la lista. Al llevar cada regla a una función pura en `taskService.js`, que recibe un arreglo y devuelve uno nuevo sin modificar el original, `app.js` quedó como un adaptador que solo lee eventos, llama al servicio y vuelve a renderizar. La Misión 11 nos lo confirmó: escribimos y probamos prioridad, búsqueda, porcentaje de avance y detección de duplicados sin abrir `app.js`; integrarlos después solo fue conectar eventos y mostrar resultados. Además, cada función nueva reutilizó piezas existentes, como `obtenerTerminadas()` dentro de `calcularAvance()`.
+
+La prueba que más confianza nos dio fue "no altera el estado de las otras tareas", de `cambiarEstado()`. Es fácil escribir un `map` que cambie la tarea correcta, pero que una prueba demuestre que el resto queda idéntico al original nos aseguró que la inmutabilidad era real y no una suposición. Esa garantía nos permitió reemplazar el `splice` del código original y hacer el refactor de la Misión 10 sin miedo: si algo se rompía, la suite nos lo iba a decir de inmediato.
+
+También aprendimos que alternar los roles de Driver y Navigator nos obligó a explicar cada decisión en voz alta; si uno de los dos no podía justificar una prueba, era señal de que todavía no la entendíamos bien.

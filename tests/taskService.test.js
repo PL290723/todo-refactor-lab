@@ -7,7 +7,11 @@ import {
   obtenerTerminadas,
   cambiarEstado,
   eliminarTarea,
-  obtenerResumen
+  obtenerResumen,
+  filtrarPorPrioridad,
+  buscarPorTexto,
+  calcularAvance,
+  esTituloDuplicado
 } from "../src/taskService.js";
 
 /*
@@ -27,7 +31,15 @@ describe("crearTarea", () => {
     const tarea = crearTarea(id, titulo);
 
     // Assert
-    expect(tarea).toEqual({ id: 10, titulo: "Diseñar pruebas", completada: false });
+    expect(tarea).toEqual({ id: 10, titulo: "Diseñar pruebas", completada: false, prioridad: "baja" });
+  });
+
+  it("asigna la prioridad indicada como tercer parámetro", () => {
+    // Act
+    const tarea = crearTarea(11, "Preparar demo", "alta");
+
+    // Assert
+    expect(tarea.prioridad).toBe("alta");
   });
 });
 
@@ -217,5 +229,62 @@ describe("obtenerResumen", () => {
       pendientes: 0,
       terminadas: 0
     });
+  });
+});
+
+// MISIÓN 11 · Nuevo requerimiento
+
+// --- A) Prioridad ---
+describe("filtrarPorPrioridad", () => {
+  it("filtra tareas por prioridad específica (baja/media/alta)", () => {
+    const tareas = [
+      { id: 1, titulo: "T1", prioridad: "alta" },
+      { id: 2, titulo: "T2", prioridad: "baja" }
+    ];
+
+    const resultado = filtrarPorPrioridad(tareas, "alta");
+
+    expect(resultado.length).toBe(1);
+    expect(resultado[0].titulo).toBe("T1");
+  });
+});
+
+// --- B) Buscar por texto ---
+describe("buscarPorTexto", () => {
+  it("encuentra tareas ignorando mayúsculas y minúsculas", () => {
+    const tareas = [{ id: 1, titulo: "Comprar LECHE" }, { id: 2, titulo: "Lavar auto" }];
+
+    const resultado = buscarPorTexto(tareas, "leche");
+
+    expect(resultado.length).toBe(1);
+    expect(resultado[0].id).toBe(1);
+  });
+});
+
+// --- C) Porcentaje de avance ---
+describe("calcularAvance", () => {
+  it("calcula el porcentaje correcto de tareas terminadas", () => {
+    const tareas = [
+      { id: 1, completada: true },
+      { id: 2, completada: true },
+      { id: 3, completada: false },
+      { id: 4, completada: false }
+    ];
+
+    expect(calcularAvance(tareas)).toBe(50);
+  });
+
+  it("devuelve 0 si la colección está vacía", () => {
+    expect(calcularAvance([])).toBe(0);
+  });
+});
+
+// --- D) Evitar duplicados ---
+describe("esTituloDuplicado", () => {
+  it("detecta títulos duplicados normalizando espacios y mayúsculas", () => {
+    const tareas = [{ id: 1, titulo: "Aprender Vitest" }];
+
+    expect(esTituloDuplicado(tareas, " aprender vitest ")).toBe(true);
+    expect(esTituloDuplicado(tareas, "aprender react")).toBe(false);
   });
 });

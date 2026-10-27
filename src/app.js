@@ -12,15 +12,24 @@ import {
   obtenerTerminadas,
   cambiarEstado,
   eliminarTarea,
-  obtenerResumen
+  obtenerResumen,
+  filtrarPorPrioridad,
+  buscarPorTexto,
+  calcularAvance,
+  esTituloDuplicado
 } from "./taskService.js";
 
 const taskForm = document.querySelector("#task-form");
 const taskInput = document.querySelector("#task-input");
+const taskPriority = document.querySelector("#task-priority");
 const taskList = document.querySelector("#task-list");
 const message = document.querySelector("#message");
 const summary = document.querySelector("#summary");
 const filterButtons = [...document.querySelectorAll("[data-filter]")];
+const priorityFilter = document.querySelector("#priority-filter");
+const searchInput = document.querySelector("#search-input");
+const progressBar = document.querySelector("#progress-bar");
+const progressText = document.querySelector("#progress-text");
 
 let tareas = [
   crearTarea(1, "Revisar requisitos"),
@@ -29,11 +38,22 @@ let tareas = [
 ];
 let siguienteId = 4;
 let filtroActivo = "todas";
+let prioridadActiva = "todas";
+let textoBusqueda = "";
 
+function filtrarPorEstado(lista) {
+  if (filtroActivo === "pendientes") return obtenerPendientes(lista);
+  if (filtroActivo === "terminadas") return obtenerTerminadas(lista);
+  return lista;
+}
+
+// MISIÓN 11: los filtros se componen; cada paso recibe el resultado del anterior.
 function obtenerTareasVisibles() {
-  if (filtroActivo === "pendientes") return obtenerPendientes(tareas);
-  if (filtroActivo === "terminadas") return obtenerTerminadas(tareas);
-  return tareas;
+  const porEstado = filtrarPorEstado(tareas);
+  const porPrioridad = prioridadActiva === "todas"
+    ? porEstado
+    : filtrarPorPrioridad(porEstado, prioridadActiva);
+  return buscarPorTexto(porPrioridad, textoBusqueda);
 }
 
 function crearElementoTarea(tarea) {
@@ -51,7 +71,11 @@ function crearElementoTarea(tarea) {
   const titulo = document.createElement("span");
   titulo.className = "title";
   titulo.textContent = tarea.titulo;
-  etiqueta.append(checkbox, " ", titulo);
+
+  const prioridad = document.createElement("span");
+  prioridad.className = `priority priority-${tarea.prioridad}`;
+  prioridad.textContent = tarea.prioridad;
+  etiqueta.append(checkbox, " ", titulo, prioridad);
 
   const acciones = document.createElement("span");
   acciones.className = "task-actions";
@@ -73,9 +97,16 @@ function renderResumen() {
   summary.textContent = `Total: ${total} | Pendientes: ${pendientes} | Terminadas: ${terminadas}`;
 }
 
+function renderAvance() {
+  const avance = calcularAvance(tareas);
+  progressBar.value = avance;
+  progressText.textContent = `Avance: ${avance}%`;
+}
+
 function render() {
   renderTareas();
   renderResumen();
+  renderAvance();
 }
 
 taskForm.addEventListener("submit", event => {
@@ -85,7 +116,11 @@ taskForm.addEventListener("submit", event => {
     message.textContent = "Escribe un título antes de agregar.";
     return;
   }
-  tareas = agregarTarea(tareas, crearTarea(siguienteId++, titulo));
+  if (esTituloDuplicado(tareas, titulo)) {
+    message.textContent = `Ya existe una tarea llamada "${titulo}".`;
+    return;
+  }
+  tareas = agregarTarea(tareas, crearTarea(siguienteId++, titulo, taskPriority.value));
   taskInput.value = "";
   message.textContent = "";
   render();
@@ -107,5 +142,15 @@ filterButtons.forEach(button => button.addEventListener("click", () => {
   filterButtons.forEach(filterButton => filterButton.classList.toggle("active", filterButton === button));
   render();
 }));
+
+priorityFilter.addEventListener("change", () => {
+  prioridadActiva = priorityFilter.value;
+  render();
+});
+
+searchInput.addEventListener("input", () => {
+  textoBusqueda = searchInput.value.trim();
+  render();
+});
 
 render();
