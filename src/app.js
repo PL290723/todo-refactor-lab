@@ -15,12 +15,12 @@ import {
   obtenerResumen
 } from "./taskService.js";
 
-const form = document.querySelector("#task-form");
-const input = document.querySelector("#task-input");
-const list = document.querySelector("#task-list");
+const taskForm = document.querySelector("#task-form");
+const taskInput = document.querySelector("#task-input");
+const taskList = document.querySelector("#task-list");
 const message = document.querySelector("#message");
 const summary = document.querySelector("#summary");
-const filters = [...document.querySelectorAll("[data-filter]")];
+const filterButtons = [...document.querySelectorAll("[data-filter]")];
 
 let tareas = [
   crearTarea(1, "Revisar requisitos"),
@@ -28,11 +28,11 @@ let tareas = [
   crearTarea(3, "Refactorizar código")
 ];
 let siguienteId = 4;
-let filtro = "todas";
+let filtroActivo = "todas";
 
-function tareasVisibles() {
-  if (filtro === "pendientes") return obtenerPendientes(tareas);
-  if (filtro === "terminadas") return obtenerTerminadas(tareas);
+function obtenerTareasVisibles() {
+  if (filtroActivo === "pendientes") return obtenerPendientes(tareas);
+  if (filtroActivo === "terminadas") return obtenerTerminadas(tareas);
   return tareas;
 }
 
@@ -64,40 +64,47 @@ function crearElementoTarea(tarea) {
   return li;
 }
 
-function render() {
-  list.replaceChildren(...tareasVisibles().map(crearElementoTarea));
-
-  const resumen = obtenerResumen(tareas);
-  summary.textContent = `Total: ${resumen.total} | Pendientes: ${resumen.pendientes} | Terminadas: ${resumen.terminadas}`;
+function renderTareas() {
+  taskList.replaceChildren(...obtenerTareasVisibles().map(crearElementoTarea));
 }
 
-form.addEventListener("submit", (event) => {
+function renderResumen() {
+  const { total, pendientes, terminadas } = obtenerResumen(tareas);
+  summary.textContent = `Total: ${total} | Pendientes: ${pendientes} | Terminadas: ${terminadas}`;
+}
+
+function render() {
+  renderTareas();
+  renderResumen();
+}
+
+taskForm.addEventListener("submit", event => {
   event.preventDefault();
-  const titulo = input.value.trim();
+  const titulo = taskInput.value.trim();
   if (!titulo) {
     message.textContent = "Escribe un título antes de agregar.";
     return;
   }
   tareas = agregarTarea(tareas, crearTarea(siguienteId++, titulo));
-  input.value = "";
+  taskInput.value = "";
   message.textContent = "";
   render();
 });
 
-list.addEventListener("click", (event) => {
-  const { toggle, delete: eliminar } = event.target.dataset;
+taskList.addEventListener("click", event => {
+  const { toggle, delete: idTareaEliminar } = event.target.dataset;
   if (toggle !== undefined) {
     tareas = cambiarEstado(tareas, Number(toggle));
     render();
-  } else if (eliminar !== undefined) {
-    tareas = eliminarTarea(tareas, Number(eliminar));
+  } else if (idTareaEliminar !== undefined) {
+    tareas = eliminarTarea(tareas, Number(idTareaEliminar));
     render();
   }
 });
 
-filters.forEach(button => button.addEventListener("click", () => {
-  filtro = button.dataset.filter;
-  filters.forEach(b => b.classList.toggle("active", b === button));
+filterButtons.forEach(button => button.addEventListener("click", () => {
+  filtroActivo = button.dataset.filter;
+  filterButtons.forEach(filterButton => filterButton.classList.toggle("active", filterButton === button));
   render();
 }));
 

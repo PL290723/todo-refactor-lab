@@ -9,8 +9,8 @@
 // MISIÓN 2
 export function crearTarea(id, titulo) {
   return {
-    id: id,
-    titulo: titulo,
+    id,
+    titulo,
     completada: false
   };
 }
@@ -27,11 +27,11 @@ export function buscarTarea(tareas, id) {
 
 // MISIÓN 5
 export function obtenerPendientes(tareas) {
-  return tareas.filter(t => !t.completada);
+  return tareas.filter(tarea => !tarea.completada);
 }
 
 export function obtenerTerminadas(tareas) {
-  return tareas.filter(t => t.completada);
+  return tareas.filter(tarea => tarea.completada);
 }
 
 // MISIÓN 6
