@@ -207,3 +207,7 @@ Registra por misión quién fue **Driver** y quién **Navigator**. Intercambien 
 | Misión 3 | Jairo | Paulo |
 | Misión 4 | Paulo | Jairo |
 | Misión 5 | Jairo | Paulo |
+| Misión 6 | Paulo | Jairo |
+| Misión 7 | Jairo | Paulo |
+| Misión 8 | Paulo | Jairo |
+| Misión 9 | Jairo | Paulo |
