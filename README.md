@@ -26,18 +26,202 @@ La primera prueba está preparada para fallar: es el punto de partida de la **Mi
 
 ## Misión 0 · Antes de modificar código
 
-Responde aquí:
+### Análisis del código base (`src/legacy.js`)
 
-1. ¿Dónde almacenarías ahora el estado `completada` de una tarea?
-2. ¿Qué ocurriría si mañana cada tarea necesita prioridad, fecha o responsable?
-3. ¿Qué parte del código representa datos y qué parte representa interfaz?
-4. ¿Qué comportamiento debemos conservar durante el refactor?
+1. **¿Dónde almacenarías ahora el estado `completada` de una tarea?**  
+   En cada tarea, como una propiedad booleana (por ejemplo, `completada: false`) dentro de un objeto de tarea. Así, el estado pertenece a los datos de esa tarea.
+2. **¿Qué ocurriría si mañana cada tarea necesita prioridad, fecha o responsable?**  
+   Con tareas representadas como objetos se pueden agregar esas propiedades sin cambiar la estructura fundamental. Si fueran strings, habría que reemplazar ese formato y adaptar el código que las recorre y muestra.
+3. **¿Qué parte del código representa datos y qué parte representa interfaz?**  
+   `tareas` y sus textos representan los datos. `mostrarTareas()` representa la interfaz: busca `#task-list` y actualiza su contenido con `innerHTML`. Actualmente ambas responsabilidades están mezcladas en el mismo archivo.
+4. **¿Qué comportamiento debemos conservar durante el refactor?**  
+   La lista debe mostrar las mismas tareas, en el mismo orden y dentro del elemento `#task-list`, usando un elemento `<li>` para cada tarea. Volver a mostrar la lista debe reemplazar el contenido anterior, no duplicar las tareas.
 
 ### Tres comportamientos observables que NO deben cambiar
 
-1. 
-2. 
-3. 
+1. Se muestran las tres tareas iniciales: “Revisar requisitos”, “Diseñar pruebas” y “Refactorizar código”, en ese orden.
+2. Cada tarea se representa como un elemento `<li>` dentro de `#task-list`.
+3. Cada llamada a mostrar la lista limpia y vuelve a generar su contenido; las llamadas repetidas no acumulan elementos duplicados.
+
+## Misión 1 · Cambiar el modelo: de string a objeto
+
+**Objetivo:** evolucionar la representación de una tarea para que pueda incorporar identidad y estado.
+
+La colección inicial dejó de ser un arreglo de strings y ahora es un arreglo de objetos. Cada tarea tiene este formato:
+
+```js
+const tarea = {
+  id: 1,
+  titulo: "Diseñar pruebas",
+  completada: false
+};
+```
+
+### Cambios realizados
+
+- `src/legacy.js`: `tareas` ahora es un arreglo de objetos `{ id, titulo, completada }` y `mostrarTareas()` muestra `tarea.titulo`.
+- `src/app.js`: la colección inicial usa el mismo formato; `render()` muestra `tarea.titulo` y cada tarea nueva se agrega como objeto con un `id` incremental y `completada: false`.
+
+### Comportamiento conservado
+
+- Se siguen mostrando las mismas tres tareas, en el mismo orden, como elementos `<li>` dentro de `#task-list`.
+- Volver a renderizar la lista reemplaza su contenido sin duplicar tareas.
+
+## Misión 2 · Crear una tarea con una función pura
+
+**Objetivo:** encapsular la construcción de una tarea en una función de dominio que se pueda probar sin el DOM.
+
+Se implementó `crearTarea(id, titulo)` en `src/taskService.js`. Devuelve un objeto con el formato definido en la Misión 1 y con `completada: false` por defecto:
+
+```js
+export function crearTarea(id, titulo) {
+  return {
+    id: id,
+    titulo: titulo,
+    completada: false
+  };
+}
+```
+
+### Prueba (`tests/taskService.test.js`)
+
+- **"crea una tarea pendiente con id y título":** `crearTarea(10, "Diseñar pruebas")` debe ser igual (`toEqual`) a `{ id: 10, titulo: "Diseñar pruebas", completada: false }`.
+
+### Ciclo RED → GREEN
+
+- **RED:** la prueba fallaba porque `crearTarea()` lanzaba `Error("Misión 2 pendiente: implementar crearTarea()")`.
+- **GREEN:** se reemplazó el `throw` por el `return` del objeto `{ id, titulo, completada: false }`.
+
+## Misión 3 · Agregar sin acoplarse al DOM
+
+**Objetivo:** separar la transformación de datos de la representación visual.
+
+Se implementó `agregarTarea(tareas, nuevaTarea)` en `src/taskService.js`. La función devuelve una **nueva** colección con la tarea agregada al final, sin modificar el arreglo original y sin tocar el DOM:
+
+```js
+export function agregarTarea(tareas, nuevaTarea) {
+  return [...tareas, nuevaTarea];
+}
+```
+
+### Pruebas agregadas (`tests/taskService.test.js`)
+
+- **"agrega una nueva tarea a la colección":** a partir de una colección vacía, el resultado contiene `nuevaTarea` (`toContainEqual`).
+- **"devuelve una colección con un elemento más":** a partir de una colección con una tarea, el resultado tiene `tareasIniciales.length + 1` elementos.
+
+### Ciclo RED → GREEN
+
+- **RED:** se escribieron las dos pruebas; fallaron porque `agregarTarea()` lanzaba `Error("Misión 3 pendiente: implementar agregarTarea()")`.
+- **GREEN:** se reemplazó el `throw` por `return [...tareas, nuevaTarea];`. El operador spread crea un arreglo nuevo, por lo que `tareas` no se modifica (a diferencia de `push()`).
+
+## Misión 4 · find(): buscar una tarea por id
+
+**Objetivo:** localizar una tarea por su identidad sin recorrer la colección manualmente.
+
+Se implementó `buscarTarea(tareas, id)` en `src/taskService.js` usando `find()`. Devuelve la primera tarea cuyo `id` coincide, o `undefined` si no existe:
+
+```js
+export function buscarTarea(tareas, id) {
+  return tareas.find(tarea => tarea.id === id);
+}
+```
+
+### Pruebas (`tests/taskService.test.js`)
+
+- **"encuentra y devuelve la tarea con un id existente":** buscar el id `2` devuelve `{ id: 2, titulo: "Refactorizar", completada: true }`.
+- **"devuelve undefined si el id no existe":** buscar el id `99` devuelve `undefined`.
+
+### Ciclo RED → GREEN
+
+- **RED:** las pruebas fallaban porque `buscarTarea()` lanzaba `Error("Misión 4 pendiente: implementar buscarTarea()")`.
+- **GREEN:** se reemplazó el `throw` por `return tareas.find(tarea => tarea.id === id);`.
+
+## Misión 5 · filter(): seleccionar subconjuntos
+
+**Objetivo:** construir subconjuntos de tareas sin alterar la colección original.
+
+Se implementaron `obtenerPendientes(tareas)` y `obtenerTerminadas(tareas)` en `src/taskService.js` usando `filter()`, que siempre devuelve un arreglo **nuevo** y no modifica el original:
+
+```js
+export function obtenerPendientes(tareas) {
+  return tareas.filter(t => !t.completada);
+}
+
+export function obtenerTerminadas(tareas) {
+  return tareas.filter(t => t.completada);
+}
+```
+
+### Pruebas (`tests/taskService.test.js`)
+
+Sobre una colección mixta (ids `1` y `3` pendientes, id `2` terminada):
+
+- **"filtra correctamente las tareas pendientes en una colección mixta":** devuelve 2 tareas, con ids `1` y `3` en ese orden.
+- **"devuelve un arreglo vacío si no hay coincidencias (ninguna pendiente)":** si todas están terminadas, devuelve `[]`.
+- **"devuelve un arreglo vacío si la colección inicial está vacía":** `obtenerPendientes([])` devuelve `[]`.
+- **"filtra correctamente las tareas terminadas":** devuelve 1 tarea, con id `2`.
+
+### Ciclo RED → GREEN
+
+- **RED:** las 4 pruebas fallaron porque ambas funciones lanzaban `Error("Misión 5 pendiente: ...")`.
+- **GREEN:** se reemplazaron los `throw` por `tareas.filter(...)` con la condición `!t.completada` (pendientes) y `t.completada` (terminadas).
+
+## Misión 8 · Resumen y composición
+
+**Objetivo:** resumir el estado de una colección reutilizando las reglas ya implementadas.
+
+Se implementó `obtenerResumen(tareas)` en `src/taskService.js`. Devuelve el total de tareas y los conteos de pendientes y terminadas, usando `obtenerPendientes()` y `obtenerTerminadas()`:
+
+```js
+export function obtenerResumen(tareas) {
+  return {
+    total: tareas.length,
+    pendientes: obtenerPendientes(tareas).length,
+    terminadas: obtenerTerminadas(tareas).length
+  };
+}
+```
+
+### Pruebas (`tests/taskService.test.js`)
+
+- **"devuelve el conteo correcto de total, pendientes y terminadas":** verifica el resumen de una colección mixta de tres tareas.
+- **"devuelve ceros si la colección está vacía":** verifica que una colección vacía produzca `{ total: 0, pendientes: 0, terminadas: 0 }`.
+
+## Misión 10 · Refactor final protegido por pruebas
+
+**Objetivo:** mejorar la legibilidad y la separación de responsabilidades sin cambiar el comportamiento.
+
+### Refactors realizados
+
+- `src/taskService.js`: se usó la forma abreviada de propiedades al crear una tarea y se reemplazaron los parámetros `t` por `tarea` en los filtros para expresar mejor su intención.
+- `src/app.js`: se renombraron referencias del DOM y del filtro con nombres más descriptivos. La actualización de la lista y del resumen se separó en `renderTareas()` y `renderResumen()`, coordinadas por `render()`.
+- La lógica de dominio continúa en `taskService.js`; `app.js` conserva la responsabilidad de conectar eventos del DOM y mostrar los resultados.
+
+### Verificación
+
+Se ejecutó `npm test` después de cada refactor. Las 17 pruebas pasaron en ambas ejecuciones.
+
+## Misión 11 · Nuevo requerimiento (los 4 retos)
+
+**Objetivo:** comprobar si el diseño resultante facilita incorporar cambios sin romper lo existente.
+
+Se agregaron cuatro funciones puras en `src/taskService.js`, cada una con su prueba escrita antes de la implementación:
+
+- **A) Prioridad:** `crearTarea(id, titulo, prioridad = "baja")` ahora recibe la prioridad como tercer parámetro, y `filtrarPorPrioridad(tareas, prioridad)` devuelve solo las tareas con esa prioridad.
+- **B) Buscar por texto:** `buscarPorTexto(tareas, texto)` encuentra tareas cuyo título contiene el texto, sin distinguir mayúsculas de minúsculas.
+- **C) Porcentaje de avance:** `calcularAvance(tareas)` devuelve el porcentaje redondeado de tareas terminadas, reutilizando `obtenerTerminadas()`; con una colección vacía devuelve `0`.
+- **D) Evitar duplicados:** `esTituloDuplicado(tareas, nuevoTitulo)` compara títulos normalizados (sin espacios al inicio o al final y en minúsculas) mediante `normalizarTitulo()`.
+
+### Ciclo RED → GREEN
+
+- **RED:** fallaron 7 pruebas: las 5 nuevas por `is not a function`, y las 2 de `crearTarea` (la original se actualizó para esperar `prioridad: "baja"` y se agregó una para la prioridad explícita).
+- **GREEN:** se implementaron las cuatro funciones y el parámetro `prioridad`. Las 23 pruebas pasan.
+
+### Integración en la interfaz
+
+- `index.html`: selector de prioridad al crear una tarea, filtro por prioridad, campo de búsqueda y barra de avance.
+- `src/app.js`: los filtros se combinan (estado → `filtrarPorPrioridad()` → `buscarPorTexto()`), cada tarea muestra su prioridad, la barra usa `calcularAvance()` y el formulario rechaza títulos repetidos con `esTituloDuplicado()`.
+- `styles.css`: estilos para los selectores, las etiquetas de prioridad y la barra de avance.
 
 ## Registro RED → GREEN → REFACTOR
 
@@ -50,3 +234,26 @@ Documenta al menos una iteración:
 ## Pair Programming
 
 Registra por misión quién fue **Driver** y quién **Navigator**. Intercambien roles con frecuencia y no hagan commit hasta que ambos puedan explicar el código y la prueba.
+
+| Misión | Navigator | Driver |
+|---|---|---|
+| Misión 0 | Paulo | Jairo |
+| Misión 1 | Jairo | Paulo |
+| Misión 2 | Paulo | Jairo |
+| Misión 3 | Jairo | Paulo |
+| Misión 4 | Paulo | Jairo |
+| Misión 5 | Jairo | Paulo |
+| Misión 6 | Paulo | Jairo |
+| Misión 7 | Jairo | Paulo |
+| Misión 8 | Paulo | Jairo |
+| Misión 9 | Jairo | Paulo |
+| Misión 10 | Paulo | Jairo |
+| Misión 11 | Jairo | Paulo |
+
+## Reflexión final (Paulo y Jairo)
+
+Separar la lógica de dominio de la interfaz fue lo que más mejoró la mantenibilidad. Al principio, `legacy.js` y `app.js` mezclaban los datos, las reglas y el DOM en el mismo lugar: para cambiar cómo se eliminaba una tarea había que tocar el código que pintaba la lista. Al llevar cada regla a una función pura en `taskService.js`, que recibe un arreglo y devuelve uno nuevo sin modificar el original, `app.js` quedó como un adaptador que solo lee eventos, llama al servicio y vuelve a renderizar. La Misión 11 nos lo confirmó: escribimos y probamos prioridad, búsqueda, porcentaje de avance y detección de duplicados sin abrir `app.js`; integrarlos después solo fue conectar eventos y mostrar resultados. Además, cada función nueva reutilizó piezas existentes, como `obtenerTerminadas()` dentro de `calcularAvance()`.
+
+La prueba que más confianza nos dio fue "no altera el estado de las otras tareas", de `cambiarEstado()`. Es fácil escribir un `map` que cambie la tarea correcta, pero que una prueba demuestre que el resto queda idéntico al original nos aseguró que la inmutabilidad era real y no una suposición. Esa garantía nos permitió reemplazar el `splice` del código original y hacer el refactor de la Misión 10 sin miedo: si algo se rompía, la suite nos lo iba a decir de inmediato.
+
+También aprendimos que alternar los roles de Driver y Navigator nos obligó a explicar cada decisión en voz alta; si uno de los dos no podía justificar una prueba, era señal de que todavía no la entendíamos bien.
